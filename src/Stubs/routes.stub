@@ -1,0 +1,2 @@
+//{{ table_name }}
+Route::resource('{{ table_name }}', {{ class_name }}::class);

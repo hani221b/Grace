@@ -1,0 +1,59 @@
+<?php
+
+namespace {{ namespace }};
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
+class {{ class_name }} extends Model
+{
+    use HasFactory;
+    use SoftDeletes;
+
+    /*<table-name>*/
+    protected $table = '{{ table_name }}';
+    /*</table-name>*/
+
+    /*<fillable-fields>*/
+    protected $fillable = [
+        'translation_of', 'translation_lang', {{ fillable_array }} , 'status', 'order'
+    ];
+    /*</fillable-fields>*/
+
+    /*<soft-delete>*/
+    protected $dates = ['deleted_at'];
+    /*</soft-delete>*/
+
+    /*<scopes>*/
+    public function scopeSelection($query)
+    {
+        return $query->select(
+            'id', 'translation_of', 'translation_lang', {{ fillable_array }} , 'status', 'order'
+        );
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('status', 1);
+    }
+
+    public function scopeDefaultLanguage($query)
+    {
+        return $query->where('translation_of', 0);
+    }
+    /*</scopes>*
+
+    /*<mutatators>*/
+    {{ mutatators }}
+    /*</mutatators>*/
+
+    /*<relations>*/
+    public function translations()
+    {
+        return $this->hasMany(self::class, 'translation_of');
+    }
+    /*</relations>*/
+
+    /*<end-of-class>*/
+}

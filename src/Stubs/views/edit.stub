@@ -1,0 +1,80 @@
+@extends('grace.grace_layout')
+
+@section('content')
+    <div class="content-body">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="basic-form">
+                                <form method="POST" action="{{ url }}"
+                                    enctype="multipart/form-data">
+                                    @csrf
+                                    <!--<{{ table_name }}-form>-->
+                                    <input type="hidden" name="{{ table_name }}[0][abbr]" class="form-control"
+                                        value="{{ ${{ key }}->translation_lang }}">
+                                    <input type="hidden" name="{{ table_name }}[0][id]" class="form-control"
+                                        value="{{ ${{ key }}->id }}">
+
+                                    {{ inputs }}
+                                    <!--</{{ table_name }}-form>-->
+                                    <div class="form-group">
+                                        <button type="submit" class="btn mb-1 btn-primary">Save</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @if(count(${{ key }}->translations) > 0)
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <h4 class="card-title">Translations</h4>
+                                <!-- Show translations -->
+                                <div class="custom-tab-1">
+                                    <ul class="nav nav-tabs mb-3">
+                                        @foreach (${{ key }}->translations as $index => $translation)
+                                            <li class="nav-item @if ($index == 0) active @endif"><a
+                                                    class="nav-link @if ($index == 0) active @endif"
+                                                    data-toggle="tab" href="#translation{{ $index }}"
+                                                    aria-expanded="{{ $index == 0 ? 'true' : 'false' }}">{{ $translation->translation_lang }}</a>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                        <form method="POST" action="{{ url }}"
+                                            enctype="multipart/form-data">
+                                            @csrf
+                                                <div class="basic-form">
+                                                <div class="tab-content">
+                                                @foreach (${{ key }}->translations as $index => $translation)
+                                                    <div class="tab-pane @if ($index == 0) active @endif"
+                                                        id="translation{{ $index }}" role="tabpanel"
+                                                        aria-expanded="{{ $index == 0 ? 'true' : 'false' }}">
+
+                                                            <input type="hidden" name="{{ table_name }}[{{ $index }}][abbr]" class="form-control"
+                                                                value="{{ $translation->translation_lang }}">
+                                                            <input type="hidden" name="{{ table_name }}[{{ $index }}][id]" class="form-control"
+                                                                value="{{ $translation->id }}">
+                                                            <!--</{{ table_name }}-translations-form>-->
+                                                            {{ translations_inputs }}
+                                                            <!--</{{ table_name }}-translations-form>-->
+
+                                                    </div>
+                                                @endforeach
+                                                <div class="form-group">
+                                                    <button type="submit" class="btn mb-1 btn-primary">Save</button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+            </div>
+        </div>
+    </div>
+@endsection

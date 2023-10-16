@@ -1,0 +1,247 @@
+<?php
+
+namespace {{ namespace }};
+
+use Hani221b\Grace\Support\Response;
+use Hani221b\Grace\Operations\DisplayRecords;
+use Hani221b\Grace\Operations\StoreMultiLanguageRecord;
+use Hani221b\Grace\Operations\UpdateMultiLanguageRecord;
+use Hani221b\Grace\Operations\GetCreationView;
+use Hani221b\Grace\Operations\GetEditingView;
+use Hani221b\Grace\Operations\RestoreRecycledMultiLanguageRecord;
+use Hani221b\Grace\Operations\RecycleMultiLanguageRecord;
+use Hani221b\Grace\Operations\DeleteMultiLanguageRecord;
+use Hani221b\Grace\Operations\ChangeStatusForMultiLanguageRecord;
+use Hani221b\Grace\Operations\SortMultiLanguageRecords;
+use App\Http\Controllers\Controller;
+use {{ request_path }};
+use Exception;
+
+class {{ class_name }} extends Controller
+{
+
+    /**
+     * Defining class properties
+     */
+    protected $table_name;
+    protected $fillable_values;
+    protected $files_fillable_values;
+    protected $model_path;
+    protected $resource_path;
+
+    /**
+     * Establishing data flow
+     */
+    public function __construct()
+    {
+        $this->table_name = '{{ table_name }}';
+        $this->fillable_values = [{{ fillable_array }}];
+        $this->files_fillable_values = [{{ fillable_files_array }}];
+        $this->model_path = '{{ model_path }}';
+        $this->resource_path = '{{ resource_path }}';
+    }
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        try {
+            return DisplayRecords::display(
+                $this->table_name,
+                $this->model_path,
+                $this->resource_path
+                );
+        } catch (Exception $exception) {
+            return Response::error('Something went wrong, please try again later', 500);
+        }
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+        try {
+            return GetCreationView::create(
+                $this->table_name,
+            );
+        } catch (Exception $exception) {
+            return Response::error('Something went wrong, please try again later', 500);
+        }
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store({{ request_class }} $request)
+    {
+        try {
+            return StoreMultiLanguageRecord::store(
+                $request[$this->table_name],
+                $this->model_path,
+                $this->fillable_values,
+                $this->files_fillable_values,
+                $this->table_name,
+            );
+        } catch (Exception $exception) {
+            return Response::error('Something went wrong, please try again later', 500);
+        }
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function edit($id)
+    {
+        try {
+            return GetEditingView::edit(
+                $id,
+                $this->table_name,
+                $this->model_path,
+            );
+        } catch (Exception $exception) {
+            return Response::error('Something went wrong, please try again later', 500);
+        }
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update({{ request_class }} $request, $id)
+    {
+        try {
+            return UpdateMultiLanguageRecord::update(
+                $id,
+                $request[$this->table_name],
+                $this->model_path,
+                $this->fillable_values,
+                $this->files_fillable_values,
+                $this->table_name,
+            );
+        } catch (Exception $exception) {
+            return Response::error('Something went wrong, please try again later', 500);
+        }
+    }
+
+    /**
+     * Move the specified resource to recycle bin.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function recycle($id)
+    {
+        try {
+            return RecycleMultiLanguageRecord::recycle(
+                $id,
+                $this->model_path,
+                $this->table_name
+            );
+        } catch (Exception $exception) {
+            return Response::error('Something went wrong, please try again later', 500);
+        }
+    }
+
+    /**
+     * Restore the specified recycled resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function restore($id)
+    {
+        try {
+            return RestoreRecycledMultiLanguageRecord::restore(
+                $id,
+                $this->model_path,
+                $this->table_name
+            );
+        } catch (Exception $exception) {
+            return Response::error('Something went wrong, please try again later', 500);
+        }
+    }
+
+    /**
+     * Delete the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+        try {
+            return DeleteMultiLanguageRecord::delete(
+                $id,
+                $this->model_path,
+                $this->files_fillable_values,
+                $this->table_name
+            );
+        } catch (Exception $exception) {
+            return Response::error('Something went wrong, please try again later', 500);
+        }
+    }
+
+    /**
+     * Change the status of the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function change_status($id)
+    {
+        try {
+            return ChangeStatusForMultiLanguageRecord::changeStatus(
+                $id,
+                $this->model_path,
+                $this->table_name
+            );
+        } catch (Exception $exception) {
+            return Response::error('Something went wrong, please try again later', 500);
+        }
+    }
+
+    /**
+     * Change the sort of a listing of resources.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function sort($id)
+    {
+        try {
+            return SortMultiLanguageRecords::sort(
+                $id,
+                $this->model_path,
+                $this->table_name
+            );
+        } catch (Exception $exception) {
+            return Response::error('Something went wrong, please try again later', 500);
+        }
+    }
+}
