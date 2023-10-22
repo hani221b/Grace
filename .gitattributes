@@ -1,2 +1,2 @@
 * linguist-vendored
-*.src/Assets linguist-vendored=false
+*.src\\Assest linguist-vendored=false
