@@ -68,6 +68,14 @@
                             </v-col>
                         </v-row>
                         <v-row>
+                            <v-col cols="6">
+                            </v-combobox>
+                            <v-text-field value="{{ config('grace.request_namespace') }}" name="request_namespace"
+                                label="Request Namespace" outlined>
+                            </v-text-field>
+                        </v-col>
+                        </v-row>
+                        <v-row>
                             <v-col cols="12">
                                 <v-btn type="submit" color="primary">Make Alive</v-btn>
                             </v-col>
