@@ -122,7 +122,7 @@ class CreateFullResource extends Controller
                 'views' => config('grace.views_folder_name') . '/' . $this->table_name,
             ]);
 
-            Artisan::call('optimize');
+            Artisan::call("cache:clear");
 
             return redirect()->route('success');
         }
