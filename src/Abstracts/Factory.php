@@ -1,14 +1,13 @@
 <?php
 
 namespace Hani221b\Grace\Abstracts;
-use App\Http\Controllers\Controller;
-use Hani221b\Grace\Support\Str;
+use Hani221b\Grace\Interfaces\IFactory;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Http\Request;
-use Hani221b\Grace\Support\Core;
 
- abstract class Factory  {
-    protected $fs;
+ abstract class Factory implements IFactory  {
+    protected $file_sys;
+    protected $path;
     protected $namespace;
     protected $table_name;
     protected $class_name;
@@ -21,9 +20,14 @@ use Hani221b\Grace\Support\Core;
     protected $resource_path;
     protected $request_namespace;
     protected $request_class;
+    protected $field_types;
+    protected $fillable_array;
+    protected $request_path;
 
-    public function __construct(Filesystem $fs, Request $request) {
-        $this->fs = $fs;
+
+    public function __construct(Filesystem $file_sys, Request $request) {
+        $this->file_sys = $file_sys;
+        $this->path = $request->namespace;
         $this->namespace = $request->namespace;
         $this->table_name = $request->table_name;
         $this->class_name = $request->class_name;
@@ -33,24 +37,49 @@ use Hani221b\Grace\Support\Core;
         $this->request_class = $request->request_class;
         $this->model_namespace = $request->model_namespace;
         $this->resource_namespace = $request->resource_namespace;
-        $this->files_fields = Core::isFileValues($request->field_names, $request->field_types);
+        $this->fillable_array = $request->fillable_array;
+        $this->fillable_files_array = $request->fillable_files_array;
+        $this->files_fields = $request->files_fields;
         $this->field_names = $request->field_names;
-        $this->fillable_files_array = Core::filesFillableArray($this->files_fields);
+        $this->field_types = $request->field_types;
+        $this->request_path = $request->request_path;
 
     }
 
+    // public function getStubVariables()
+    // {
+    //     return [
+    //         'namespace' => Str::namespaceCorrection($this->namespace),
+    //         'class_name' => Str::singularClass($this->table_name) . 'Controller',
+    //         'table_name' => $this->table_name,
+    //         'model_path' => $this->model_path . "/" . Str::singularClass($this->table_name),
+    //         'resource_path' => $this->resource_path . "/" . Str::singularClass($this->table_name) . 'Resource',
+    //         'fillable_array' => Core::fillableArray($this->field_names, $this->files_fields),
+    //         'fillable_files_array' => "'" . str_replace(",", "', '", $this->fillable_files_array) . "'",
+    //         'request_path' => Str::namespaceCorrection($this->request_namespace) . "\\" . Str::singularClass($this->table_name) . 'Request',
+    //         'request_class' => 'Request',
+    //         'field_types' => $this->field_types,
+    //         'field_names' => $this->field_names,
+    //     ];
+    // }
     public function getStubVariables()
     {
-        return [
-            'namespace' => Str::namespaceCorrection($this->namespace),
-            'class_name' => Str::singularClass($this->table_name) . 'Controller',
+        $vars =  [
+            'namespace' => $this->namespace,
+            'class_name' => $this->class_name,
             'table_name' => $this->table_name,
-            'model_path' => $this->model_path . "/" . Str::singularClass($this->table_name),
-            'resource_path' => $this->resource_path . "/" . Str::singularClass($this->table_name) . 'Resource',
-            'fillable_array' => Core::fillableArray($this->field_names, $this->files_fields),
-            'fillable_files_array' => "'" . str_replace(",", "', '", $this->fillable_files_array) . "'",
-            'request_path' => Str::namespaceCorrection($this->request_namespace) . "\\" . Str::singularClass($this->table_name) . 'Request',
-            'request_class' => 'Request',
+            'model_path' => $this->model_path,
+            'resource_path' => $this->resource_path,
+            'fillable_array' => $this->fillable_array,
+            'fillable_files_array' => $this->fillable_files_array,
+            'request_path' => $this->request_path,
+            'request_class' => $this->request_class,
+            'field_types' => $this->field_types,
+            'field_names' => $this->field_names,
+            'model_namespace' => $this->model_namespace,
+            'request_namespace' => $this->request_namespace,
         ];
+
+        return array_filter($vars, fn($val) => $val !== '' && !is_array($val));
     }
 }

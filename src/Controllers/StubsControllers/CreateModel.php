@@ -2,7 +2,7 @@
 
 namespace Hani221b\Grace\Controllers\StubsControllers;
 
-use App\Http\Controllers\Controller;
+use Hani221b\Grace\Abstracts\Factory as AbstractsFactory;
 use Hani221b\Grace\Support\Core;
 use Hani221b\Grace\Support\Factory;
 use Hani221b\Grace\Support\File;
@@ -10,7 +10,7 @@ use Illuminate\Filesystem\Filesystem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Pluralizer;
 
-class CreateModel extends Controller
+class CreateModel extends AbstractsFactory
 {
     /**
      * Filesystem instance
@@ -71,16 +71,12 @@ class CreateModel extends Controller
     /**
      * Execute the file creation.
      */
-    public function makeModelAlive()
+    public function makeAlive()
     {
         $model_path = File::sourceFilePath($this->namespace, $this->table_name, '');
-
         File::makeDirectory($this->files, dirname($model_path));
-
         $model_contents = File::modelSourceFile($this->getStubVariables(), 'model');
-
         File::put($this->files, $model_path, $model_contents);
-
         return redirect()->route('success');
     }
 }
