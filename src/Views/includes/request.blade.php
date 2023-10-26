@@ -12,7 +12,7 @@
                                 </v-text-field>
                             </v-col>
                             <v-col cols="6">
-                                <v-text-field name="class_name" label="Class Name" outlined>
+                                <v-text-field name="table_name" label="Table Name" outlined>
                                 </v-text-field>
                             </v-col>
                         </v-row>

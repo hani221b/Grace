@@ -17,7 +17,7 @@ Route::get('success', [DashboardController::class, 'success'])->name('success');
 Route::post('create_model', [CreateModel::class, 'makeAlive'])->name('makeModelAlive');
 Route::post('create_controller', [CreateController::class, 'makeAlive'])->name('makeControllerAlive');
 Route::post('create_migration', [CreateMigration::class, 'makeAlive'])->name('makeMigrationAlive');
-Route::post('create_request', [CreateRequest::class, 'makeRequestAlive'])->name('makeRequestAlive');
+Route::post('create_request', [CreateRequest::class, 'makeAlive'])->name('makeRequestAlive');
 Route::post('create_resource', [CreateResource::class, 'makeResourceAlive'])->name('makeResourceAlive');
 Route::post('create_full_resource', [CreateFullResource::class, 'makeFullResourceAlive'])->name('makeFullResourceAlive');
 

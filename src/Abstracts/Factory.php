@@ -1,11 +1,11 @@
 <?php
 
 namespace Hani221b\Grace\Abstracts;
-use Hani221b\Grace\Interfaces\IFactory;
+use Hani221b\Grace\Support\File;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Http\Request;
 
- abstract class Factory implements IFactory  {
+ abstract class Factory {
     protected $file_sys;
     protected $path;
     protected $namespace;
@@ -23,6 +23,11 @@ use Illuminate\Http\Request;
     protected $field_types;
     protected $fillable_array;
     protected $request_path;
+    protected $suffix;
+    protected $source_file_type;
+
+    protected $sourceFilePath;
+    protected $sourceFile;
 
 
     public function __construct(Filesystem $file_sys, Request $request) {
@@ -43,43 +48,20 @@ use Illuminate\Http\Request;
         $this->field_names = $request->field_names;
         $this->field_types = $request->field_types;
         $this->request_path = $request->request_path;
+        $this->suffix = $request->suffix;
+        $this->source_file_type = $request->source_file_type;
+
 
     }
 
-    // public function getStubVariables()
-    // {
-    //     return [
-    //         'namespace' => Str::namespaceCorrection($this->namespace),
-    //         'class_name' => Str::singularClass($this->table_name) . 'Controller',
-    //         'table_name' => $this->table_name,
-    //         'model_path' => $this->model_path . "/" . Str::singularClass($this->table_name),
-    //         'resource_path' => $this->resource_path . "/" . Str::singularClass($this->table_name) . 'Resource',
-    //         'fillable_array' => Core::fillableArray($this->field_names, $this->files_fields),
-    //         'fillable_files_array' => "'" . str_replace(",", "', '", $this->fillable_files_array) . "'",
-    //         'request_path' => Str::namespaceCorrection($this->request_namespace) . "\\" . Str::singularClass($this->table_name) . 'Request',
-    //         'request_class' => 'Request',
-    //         'field_types' => $this->field_types,
-    //         'field_names' => $this->field_names,
-    //     ];
-    // }
-    public function getStubVariables()
-    {
-        $vars =  [
-            'namespace' => $this->namespace,
-            'class_name' => $this->class_name,
-            'table_name' => $this->table_name,
-            'model_path' => $this->model_path,
-            'resource_path' => $this->resource_path,
-            'fillable_array' => $this->fillable_array,
-            'fillable_files_array' => $this->fillable_files_array,
-            'request_path' => $this->request_path,
-            'request_class' => $this->request_class,
-            'field_types' => $this->field_types,
-            'field_names' => $this->field_names,
-            'model_namespace' => $this->model_namespace,
-            'request_namespace' => $this->request_namespace,
-        ];
+    abstract public function getStubVariables();
 
-        return array_filter($vars, fn($val) => $val !== '' && !is_array($val));
+    public function makeFileAlive()
+    {
+        $path = \call_user_func($this->sourceFilePath, $this->path, $this->table_name, $this->suffix);
+        $contents = \call_user_func($this->sourceFile, $this->getStubVariables(), $this->source_file_type);
+        File::makeDirectory($this->file_sys, dirname($path));
+        File::put($this->file_sys, $path, $contents);
+        return redirect()->route("success");
     }
 }

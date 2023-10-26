@@ -16,6 +16,11 @@ class Str
         return ucwords(Pluralizer::singular($class_name));
     }
 
+     public static function getSingularClassName($table_name): string
+    {
+        return $table_name !== null ? ucwords(Pluralizer::singular($table_name)) : "";
+    }
+
     /**
      * Return the PLural Lower Case Name
      * @param $table_name
