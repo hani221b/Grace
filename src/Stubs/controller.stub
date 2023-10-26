@@ -14,7 +14,8 @@ use Hani221b\Grace\Operations\DeleteMultiLanguageRecord;
 use Hani221b\Grace\Operations\ChangeStatusForMultiLanguageRecord;
 use Hani221b\Grace\Operations\SortMultiLanguageRecords;
 use App\Http\Controllers\Controller;
-use {{ request_path }};
+use Illuminate\Http\Request;
+use {{ request_namespace }};
 use Exception;
 
 class {{ class_name }} extends Controller

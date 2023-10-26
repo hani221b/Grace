@@ -2,80 +2,50 @@
 
 namespace Hani221b\Grace\Controllers\StubsControllers;
 
-use App\Http\Controllers\Controller;
+use Hani221b\Grace\Interfaces\IFactory;
+use Hani221b\Grace\Abstracts\Factory;
 use Hani221b\Grace\Support\Core;
-use Hani221b\Grace\Support\File;
 use Hani221b\Grace\Support\Str;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Http\Request;
 
-class CreateController extends Controller
+class CreateController extends Factory implements IFactory
 {
-    /**
-     * Filesystem instance
-     * @var Filesystem
-     */
-    protected $files;
-    protected $class_name;
-    protected $namespace;
-    protected $table_name;
-    protected $model_path;
-    protected $resource_path;
-    protected $field_names;
-    protected $field_types;
-    protected $files_fields;
-    protected $fillable_files_array;
-
-    /**
-     * Create a new command instance.
-     * @param Filesystem $files
-     */
-    public function __construct(Filesystem $files, Request $request)
+    public function __construct(Filesystem $file_sys, Request $request)
     {
-        $this->files = $files;
-        $this->class_name = $request->class_name;
-        $this->namespace = $request->namespace;
-        $this->table_name = $request->table_name;
-        $this->model_path = $request->model_namespace;
-        $this->resource_path = $request->resource_namespace;
+        parent::__construct($file_sys, $request);
+
+        $this->suffix = "Controller";
+        $this->source_file_type = "controller";
+        $this->namespace = Str::namespaceCorrection($this->namespace);
+        $this->class_name = Str::singularClass($this->table_name) . $this->suffix;
+        $this->model_namespace = $this->model_namespace . "/" . Str::singularClass($this->table_name);
         $this->files_fields = Core::isFileValues($request->field_names, $request->field_types);
-        $this->field_names = $request->field_names;
         $this->fillable_files_array = Core::filesFillableArray($this->files_fields);
+        $this->request_class =  "Request";
+        $this->fillable_array = Core::fillableArray($this->field_names, $this->files_fields);
+        $this->request_namespace = Str::namespaceCorrection($this->request_namespace);
+        $this->resource_path = $this->resource_path . "/" . Str::singularClass($this->table_name) . 'Resource';
+
+        $this->sourceFilePath = "Hani221b\Grace\Support\File::sourceFilePath";
+        $this->sourceFile = "Hani221b\Grace\Support\File::sourceFile";
     }
 
-    /**
-     **
-     * Map the stub variables present in stub to its value
-     *
-     * @return array
-     *
-     */
-    public function getStubVariables()
-    {
+    public function getStubVariables(){
         return [
             'namespace' => $this->namespace,
-            'class_name' => Str::singularClass($this->table_name) . 'Controller',
+            'class_name' => $this->class_name,
             'table_name' => $this->table_name,
-            'model_path' => $this->model_path . "/" . Str::singularClass($this->table_name),
-            'resource_path' => $this->resource_path . "/" . Str::singularClass($this->table_name) . 'Resource',
-            'fillable_array' => Core::fillableArray($this->field_names, $this->files_fields),
-            'fillable_files_array' => "'" . str_replace(",", "', '", $this->fillable_files_array) . "'",
+            'model_path' => $this->model_namespace,
+            'request_namespace' => $this->request_namespace,
+            'resource_path' => $this->resource_path,
+            'fillable_array' => $this->fillable_array,
+            'fillable_files_array' => $this->fillable_files_array,
+            'request_class' => $this->request_class,
         ];
     }
-
-    /**
-     * Execute the file creation.
-     */
-    public function makeControllerAlive()
+    public function makeAlive()
     {
-        $controller_path = File::sourceFilePath($this->namespace, $this->table_name, 'Controller');
-
-        File::makeDirectory($this->files, dirname($controller_path));
-
-        $controller_contents = File::sourceFile($this->getStubVariables(), 'controller');
-
-        File::put($this->files, $controller_path, $controller_contents);
-
-        return redirect()->route('success');
+       return $this->makeFileAlive();
     }
 }

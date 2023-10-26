@@ -2,59 +2,37 @@
 
 namespace Hani221b\Grace\Controllers\StubsControllers;
 
-use Hani221b\Grace\Support\File;
 use Illuminate\Filesystem\Filesystem;
-use App\Http\Controllers\Controller;
+use Hani221b\Grace\Abstracts\Factory;
 use Illuminate\Http\Request;
-use Hani221b\Grace\Support\Str as GraceStr;
-class CreateRequest extends Controller
+use Hani221b\Grace\Support\Str;
+class CreateRequest extends Factory
 {
-    /**
-     * Filesystem instance
-     * @var Filesystem
-     */
-    protected $files;
-    protected $namespace;
-    protected $class_name;
-    /**
-     * Create a new command instance.
-     * @param Filesystem $files
-     */
-    public function __construct(Filesystem $files, Request $request)
+
+    public function __construct(Filesystem $file_sys, Request $request)
     {
-        $this->files = $files;
-        $this->namespace = $request->namespace;
-        $this->class_name = $request->class_name;
+        parent::__construct($file_sys, $request);
+
+        $this->suffix = "Request";
+        $this->source_file_type = "request";
+        $this->sourceFilePath = "Hani221b\Grace\Support\File::sourceFilePath";
+        $this->sourceFile = "Hani221b\Grace\Support\File::sourceFile";
+        $this->class_name = Str::singularClass($this->table_name) . $this->suffix;
+        $this->namespace = Str::namespaceCorrection($this->namespace);;
+
     }
 
-    /**
-     **
-     * Map the stub variables present in stub to its value
-     *
-     * @return array
-     *
-     */
     public function getStubVariables()
     {
         return [
-            'namespace' => 'App\\Http\\Requests' . $this->namespace,
-            'class_name' => GraceStr::singularClass($this->class_name),
+            'namespace' => $this->namespace,
+            'class_name' => $this->class_name,
+            'table_name' => $this->table_name,
         ];
     }
 
-    /**
-     * Execute the file creation.
-     */
-    public function makeRequestAlive()
+    public function makeAlive()
     {
-        $path = File::sourceFilePath($this->namespace, $this->class_name, 'Request');
-
-        File::makeDirectory($this->files, dirname($path));
-
-        $contents = File::sourceFile($this->getStubVariables(), 'request');
-
-        File::put($this->files, $path, $contents);
-
-        return redirect()->route('success');
+        return $this->makeFileAlive();
     }
 }

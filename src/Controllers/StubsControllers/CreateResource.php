@@ -2,61 +2,37 @@
 
 namespace Hani221b\Grace\Controllers\StubsControllers;
 
-use Hani221b\Grace\Support\File;
 use Illuminate\Filesystem\Filesystem;
-use App\Http\Controllers\Controller;
+use Hani221b\Grace\Abstracts\Factory;
 use Illuminate\Http\Request;
-use Hani221b\Grace\Support\Str as GraceStr;
+use Hani221b\Grace\Support\Str;
 
-class CreateResource extends Controller
+class CreateResource extends Factory
 {
-    /**
-     * Filesystem instance
-     * @var Filesystem
-     */
-    protected $files;
-    protected $namespace;
-    protected $class_name;
 
-    /**
-     * Create a new command instance.
-     * @param Filesystem $files
-     */
-    public function __construct(Filesystem $files, Request $request)
+    public function __construct(Filesystem $file_sys, Request $request)
     {
-        $this->files = $files;
-        $this->namespace = $request->namespace;
-        $this->class_name = $request->class_name;
-    }
+        parent::__construct($file_sys, $request);
 
-    /**
-     **
-     * Map the stub variables present in stub to its value
-     *
-     * @return array
-     *
-     */
+        $this->suffix = "Request";
+        $this->source_file_type = "request";
+        $this->sourceFilePath = "Hani221b\Grace\Support\File::sourceFilePath";
+        $this->sourceFile = "Hani221b\Grace\Support\File::sourceFile";
+        $this->class_name = Str::singularClass($this->table_name) . $this->suffix;
+        $this->namespace = Str::namespaceCorrection($this->namespace);;
+
+    }
     public function getStubVariables()
     {
         return [
             'namespace' => $this->namespace,
-            'class_name' => GraceStr::singularClass($this->class_name),
+            'class_name' => Str::singularClass($this->class_name),
         ];
     }
 
-    /**
-     * Execute the console command.
-     */
+
     public function makeResourceAlive()
     {
-        $path = File::sourceFilePath($this->namespace, $this->class_name, 'Resource');
-
-        File::makeDirectory($this->files, dirname($path));
-
-        $contents = File::sourceFile($this->getStubVariables(), 'resource');
-
-        File::put($this->files, $path, $contents);
-
-        return redirect()->route('success');
+        return $this->makeFileAlive();
     }
 }
