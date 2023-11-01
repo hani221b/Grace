@@ -3,6 +3,7 @@
 namespace Hani221b\Grace\Support;
 
 use Hani221b\Grace\Support\Str as GraceStr;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Str;
 class Factory
 {
@@ -127,5 +128,48 @@ Route::resource('$table_name', $controller_name::class, ['as' => 'grace']);
         self::appendUseController($stubVariables, $controller_name);
         fwrite($opened_file, $routes_template);
         fclose($opened_file);
+    }
+
+    public static function getSourceFilePath(string $type): string
+    {
+        if($type === "model"){
+            $sourceFilePath = "Hani221b\Grace\Support\File::sourceFilePath";
+        } else if($type === "migration"){
+            $sourceFilePath = "Hani221b\Grace\Support\File::migrationSourceFilePath";
+        } else {
+            $sourceFilePath = "Hani221b\Grace\Support\File::sourceFilePath";
+        }
+        return $sourceFilePath;
+    }
+
+    public static function getSourceFile(string $type): string
+    {
+        if($type === "model"){
+            $sourceFile = "Hani221b\Grace\Support\File::modelSourceFile";
+        } else if($type === "migration"){
+            $sourceFile = "Hani221b\Grace\Support\File::migrationSourceFile";
+        } else {
+            $sourceFile = "Hani221b\Grace\Support\File::sourceFile";
+        }
+        return $sourceFile;
+    }
+
+    public static function MigrateTable(string $type, string $path): void
+    {
+        if ($type === "migration" && config('grace.auto_migrate') === true) {
+            $base_path = base_path();
+            $file_name = str_replace($base_path, '', $path);
+            Artisan::call('migrate', ['--path' => $file_name]);
+        }
+    }
+
+    public static function getResourceType(string $type, $single_record_table): string
+    {
+        if ($type === "controller" && $single_record_table === null) {
+            $type = "controller";
+        } else if ($type === "controller" && $single_record_table === "1") {
+            $type = "controller.single.record";
+        }
+        return $type;
     }
 }

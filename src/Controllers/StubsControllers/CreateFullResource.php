@@ -4,7 +4,6 @@ namespace Hani221b\Grace\Controllers\StubsControllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Table;
-use Exception;
 use Hani221b\Grace\Support\Core;
 use Hani221b\Grace\Support\Factory;
 use Hani221b\Grace\Support\File;
@@ -20,11 +19,7 @@ use Hani221b\Grace\Support\Str as GraceStr;
 
 class CreateFullResource extends Controller
 {
-    /**
-     * Filesystem instance
-     * @var Filesystem
-     */
-    protected $files;
+    protected $file_sys;
     protected $table_name;
     protected $single_table_name;
     protected $controller_namespace;
@@ -41,13 +36,9 @@ class CreateFullResource extends Controller
     protected $fillable_files_array;
     protected $input_types;
 
-    /**
-     * Create a new command instance.
-     * @param Filesystem $files
-     */
-    public function __construct(Filesystem $files, Request $request)
+    public function __construct(Filesystem $file_sys, Request $request)
     {
-        $this->files = $files;
+        $this->file_sys = $file_sys;
         $this->table_name = $request->table_name;
         if ($request->table_name != null) {
             $this->single_table_name = Str::singular($request->table_name);
@@ -60,11 +51,9 @@ class CreateFullResource extends Controller
         $this->field_names = $request->field_names;
         $this->files_fields = Core::isFileValues($request->field_names, $request->input_types);
         $this->fillable_files_array = Core::filesFillableArray($this->files_fields);
-        //filtering null values
         if ($request->field_types !== null) {
             $this->field_types = array_filter($request->field_types, fn ($value) => !is_null($value) && $value !== '');
         }
-        //filtering null values
         if ($request->input_types !== null) {
             $this->input_types = array_filter($request->input_types, fn ($value) => !is_null($value) && $value !== '');
         }
@@ -73,35 +62,19 @@ class CreateFullResource extends Controller
         $this->select_options = $request->select_options;
     }
 
-    /**
-     * Execute the file creation.
-     */
-
     public function executeFileCreation()
     {
-        // migration
-        $this->makeMigration();
-        //model
-        $this->makeModel();
-        // controller
-        $this->makeController();
-        //request
-        $this->makeRequest();
-        //resource
-        $this->makeResource();
-        //routes
+        $this->makeFileAlive($this->getMigrationVariables(), "migration", $this->migration_namespace, $this->table_name);
+        $this->makeFileAlive($this->getModelVariables(), "model", $this->model_namespace, "");
+        $this->makeFileAlive($this->getControllerVariables(), "controller", $this->controller_namespace, "Controller");
+        $this->makeFileAlive($this->getRequestVariables(), "request", $this->request_namespace, "Request");
+        $this->makeFileAlive($this->getResourceVariables(), "resource", $this->resource_namespace, "Resource");
         $this->makeRoutes();
-        //disk
         $this->makeDisk();
-        //views
         if (config('grace.mode') === 'blade') {
             $this->makeViews();
         }
     }
-
-    /**
-     * Execute the file creation.
-     */
 
     public function makeFullResourceAlive()
     {
@@ -110,7 +83,6 @@ class CreateFullResource extends Controller
             return 'Table already exist';
         } else {
             $this->executeFileCreation();
-
             Table::create([
                 'table_name' => $this->table_name,
                 'controller' => $this->controller_namespace . '/' . GraceStr::singularClass($this->table_name) . 'Controller',
@@ -121,17 +93,11 @@ class CreateFullResource extends Controller
                     . "_create_" . GraceStr::pluralLower($this->table_name) . "_table",
                 'views' => config('grace.views_folder_name') . '/' . $this->table_name,
             ]);
-
             Artisan::call("cache:clear");
-
             return redirect()->route('success');
         }
     }
 
-    /**
-     * Mapping the value of migration stubs variables
-     * @return array
-     */
     public function getMigrationVariables()
     {
         return [
@@ -142,10 +108,6 @@ class CreateFullResource extends Controller
         ];
     }
 
-    /**
-     * Mapping the value of model stubs variables
-     * @return array
-     */
     public function getModelVariables()
     {
         return [
@@ -158,10 +120,6 @@ class CreateFullResource extends Controller
         ];
     }
 
-    /**
-     * Mapping the value of controller stubs variables
-     * @return array
-     */
     public function getControllerVariables()
     {
         return [
@@ -177,10 +135,6 @@ class CreateFullResource extends Controller
         ];
     }
 
-    /**
-     * Mapping the value of request stubs variables
-     * @return array
-     */
     public function getRequestVariables()
     {
         return [
@@ -191,11 +145,6 @@ class CreateFullResource extends Controller
         ];
     }
 
-    /**
-     * Mapping the value of resource stubs variables
-     * @return array
-     */
-
     public function getResourceVariables()
     {
         return [
@@ -205,10 +154,6 @@ class CreateFullResource extends Controller
         ];
     }
 
-    /**
-     * Mapping the value of routes stubs variables
-     * @return array
-     */
     public function getRoutesVariables()
     {
         return [
@@ -218,10 +163,6 @@ class CreateFullResource extends Controller
         ];
     }
 
-    /**
-     * Mapping the value of disk stubs variables
-     * @return array
-     */
     public function getDiskVariables()
     {
         return [
@@ -230,10 +171,6 @@ class CreateFullResource extends Controller
         ];
     }
 
-    /**
-     * Mapping the value of create view stubs variables
-     * @return array
-     */
     public function getCreateViewVariables()
     {
         return [
@@ -245,10 +182,6 @@ class CreateFullResource extends Controller
         ];
     }
 
-    /**
-     * Mapping the value of edit view stubs variables
-     * @return array
-     */
     public function getEditViewVariables()
     {
         return [
@@ -261,10 +194,6 @@ class CreateFullResource extends Controller
         ];
     }
 
-    /**
-     * Mapping the value of create index stubs variables
-     * @return array
-     */
     public function getIndexViewVariables()
     {
         return [
@@ -276,10 +205,6 @@ class CreateFullResource extends Controller
         ];
     }
 
-    /**
-     * Mapping the value of create side stubs variables
-     * @return array
-     */
     public function getSidebarViewVariables()
     {
         return [
@@ -288,123 +213,15 @@ class CreateFullResource extends Controller
         ];
     }
 
-    /**
-     * Create Migration
-     * @return void
-     */
-
-    public function makeMigration()
-    {
-        $path = File::migrationSourceFilePath($this->migration_namespace, $this->table_name);
-
-        File::makeDirectory($this->files, dirname($path));
-
-        $contents = File::migrationSourceFile($this->getMigrationVariables(), 'migration');
-
-        File::put($this->files, $path, $contents);
-
-        if (config('grace.auto_migrate') === true) {
-            $base_path = base_path();
-
-            $file_name = str_replace($base_path, '', $path);
-
-            Artisan::call('migrate', ['--path' => $file_name]);
-        }
-    }
-
-    /**
-     * Create Model
-     * @return void
-     */
-
-    public function makeModel()
-    {
-        $model_path = File::sourceFilePath($this->model_namespace, $this->table_name, '');
-
-        File::makeDirectory($this->files, dirname($model_path));
-
-        $model_contents = File::modelSourceFile($this->getModelVariables(), 'model');
-
-        File::put($this->files, $model_path, $model_contents);
-    }
-
-    /**
-     * Create Controller
-     * @return void
-     */
-
-    public function makeController()
-    {
-        $controller_path = File::sourceFilePath($this->controller_namespace, $this->table_name, 'Controller');
-
-        File::makeDirectory($this->files, dirname($controller_path));
-
-        if ($this->single_record_table === null) {
-            $type = 'controller';
-        } else if ($this->single_record_table === "1") {
-            $type = 'controller.single.record';
-        }
-        $controller_contents = File::sourceFile($this->getControllerVariables(), $type);
-
-        File::put($this->files, $controller_path, $controller_contents);
-    }
-
-    /**
-     * Create Request
-     * @return void
-     */
-
-    public function makeRequest()
-    {
-        $request_path = File::sourceFilePath($this->request_namespace, $this->table_name, 'Request');
-
-        File::makeDirectory($this->files, dirname($request_path));
-
-        $request_contents = File::sourceFile($this->getRequestVariables(), 'request');
-
-        File::put($this->files, $request_path, $request_contents);
-    }
-
-    /**
-     * Create Resource
-     * @return void
-     */
-
-    public function makeResource()
-    {
-        $resource_path = File::sourceFilePath($this->resource_namespace, $this->table_name, 'Resource');
-
-        File::makeDirectory($this->files, dirname($resource_path));
-
-        $resource_contents = File::sourceFile($this->getResourceVariables(), 'resource');
-
-        File::put($this->files, $resource_path, $resource_contents);
-    }
-
-    /**
-     * Create Routes
-     * @return void
-     */
-
     public function makeRoutes()
     {
         Factory::appendRoutes($this->getRoutesVariables());
     }
 
-    /**
-     * Create Disk
-     * @return void
-     */
-
     public function makeDisk()
     {
         Factory::appendDisk($this->getDiskVariables());
     }
-
-    /**
-     * Create Disk
-     * @return void
-     */
 
     public function makeViews()
     {
@@ -412,5 +229,17 @@ class CreateFullResource extends Controller
         Edit::make($this->table_name, $this->getEditViewVariables());
         Index::make($this->table_name, $this->getIndexViewVariables());
         Sidebar::append($this->getSidebarViewVariables());
+    }
+
+    public function makeFileAlive(array $StubV_ariables, string $type, string $path, string $suffix): void
+    {
+        $source_file_path = Factory::getSourceFilePath($type);
+        $source_file = Factory::getSourceFile($type);
+        $type = Factory::getResourceType($type, $this->single_record_table);
+        $path = \call_user_func($source_file_path, $path, $this->table_name, $suffix);
+        $contents = \call_user_func($source_file, $StubV_ariables, $type);
+        File::makeDirectory($this->file_sys, dirname($path));
+        File::put($this->file_sys, $path, $contents);
+        Factory::MigrateTable($type, $path);
     }
 }
