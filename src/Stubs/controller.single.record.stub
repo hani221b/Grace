@@ -23,11 +23,11 @@ class {{ class_name }} extends Controller
     /**
      * Defining class properties
      */
-    protected $table_name;
-    protected $fillable_values;
-    protected $files_fillable_values;
-    protected $model_path;
-    protected $resource_path;
+    private $table_name;
+    private $fillable_values;
+    private $files_fillable_values;
+    private $model_path;
+    private $resource_path;
 
     /**
      * Establishing data flow

@@ -10,6 +10,7 @@ use Hani221b\Grace\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Artisan;
 
 class DashboardController
 {
@@ -153,11 +154,13 @@ class DashboardController
         $sidebar_item_start = "<!--<$table->table_name>-->";
         $sidebar_item_end = "<!--</$table->table_name>-->";
         $sidebar_file = base_path() . '/resources/views/grace/includes/sidebar.blade.php';
-        $sidebar_file_content = file_get_contents($sidebar_file);
-        $item = Str::getBetween($sidebar_file_content, $sidebar_item_start, $sidebar_item_end);
-        $full_item = $sidebar_item_start . $item . $sidebar_item_end;
-        $new_sidebar_file = str_replace($full_item, '', $sidebar_file_content);
-        file_put_contents($sidebar_file, $new_sidebar_file);
+        if(file_exists($sidebar_file)){
+            $sidebar_file_content = file_get_contents($sidebar_file);
+            $item = Str::getBetween($sidebar_file_content, $sidebar_item_start, $sidebar_item_end);
+            $full_item = $sidebar_item_start . $item . $sidebar_item_end;
+            $new_sidebar_file = str_replace($full_item, '', $sidebar_file_content);
+            file_put_contents($sidebar_file, $new_sidebar_file);
+        }
 
         //remove views
 
@@ -171,6 +174,7 @@ class DashboardController
 
         $table->delete();
 
+        Artisan::call("cache:clear");
         return redirect()->route('success');
     }
 
