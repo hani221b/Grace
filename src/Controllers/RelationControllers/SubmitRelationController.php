@@ -133,12 +133,15 @@ class SubmitRelationController
                 'foreign_table'=>$foriegn_table
                 ]);
             //append relation field in create.blade.pho file
-            $create_file_content = file_get_contents(base_path()."/resources/views/grace/$this->local_table/create.blade.php");
-            $create_form = GraceStr::getBetween( $create_file_content, "<!--<$this->local_table-form>-->","<!--</$this->local_table-form>-->");
-            $new_create_form = $create_form . $this->create($foriegn_table, $foriegn_key);
-            $new_create_form = preg_replace('/\\\\/', '', $new_create_form);
-            $create_file_content = str_replace($create_form, $new_create_form, $create_file_content);
-            file_put_contents(base_path()."/resources/views/grace/$this->local_table/create.blade.php" ,$create_file_content);
+            $blade_create_file = base_path()."/resources/views/grace/$this->local_table/create.blade.php";
+            if(file_exists($blade_create_file)){
+                $create_file_content = file_get_contents($blade_create_file);
+                $create_form = GraceStr::getBetween( $create_file_content, "<!--<$this->local_table-form>-->","<!--</$this->local_table-form>-->");
+                $new_create_form = $create_form . $this->create($foriegn_table, $foriegn_key);
+                $new_create_form = preg_replace('/\\\\/', '', $new_create_form);
+                $create_file_content = str_replace($create_form, $new_create_form, $create_file_content);
+                file_put_contents($blade_create_file ,$create_file_content);
+            }
         }
     }
 
@@ -150,12 +153,15 @@ class SubmitRelationController
         $foreign_tables_keys = array_combine($this->foreign_table, $this->foriegn_key);
         foreach ($foreign_tables_keys as $foriegn_table => $foriegn_key) {
             //append relation field in create.blade.pho file
-            $edit_file_content = file_get_contents(base_path()."/resources/views/grace/$this->local_table/edit.blade.php");
-            $edit_form = GraceStr::getBetween($edit_file_content, $start_marker, $end_marker);
-            $new_edit_form = $edit_form . $this->edit($foriegn_table, $foriegn_key, $index);
-            $new_edit_form = preg_replace('/\\\\/', '', $new_edit_form);
-            $edit_file_content = str_replace($edit_form, $new_edit_form, $edit_file_content);
-            file_put_contents(base_path()."/resources/views/grace/$this->local_table/edit.blade.php" ,$edit_file_content);
+            $blade_edit_file = base_path()."/resources/views/grace/$this->local_table/edit.blade.php";
+            if(file_exists($blade_edit_file)){
+                $edit_file_content = file_get_contents($blade_edit_file);
+                $edit_form = GraceStr::getBetween($edit_file_content, $start_marker, $end_marker);
+                $new_edit_form = $edit_form . $this->edit($foriegn_table, $foriegn_key, $index);
+                $new_edit_form = preg_replace('/\\\\/', '', $new_edit_form);
+                $edit_file_content = str_replace($edit_form, $new_edit_form, $edit_file_content);
+                file_put_contents($blade_edit_file ,$edit_file_content);
+            }
         }
     }
 
@@ -165,22 +171,25 @@ class SubmitRelationController
      */
     public function appendIndexFields(){
         $foriegn_data = [];
-        $index_file = file_get_contents(base_path() . "/resources/views/grace/$this->local_table/index.blade.php");
-        foreach ($this->foreign_table as $table) {
-            foreach ($this->display_key as  $key) {
-                array_push($foriegn_data, $table."_|_".$key);
+        $index_blade_file = base_path() . "/resources/views/grace/$this->local_table/index.blade.php";
+        if(file_exists($index_blade_file)){
+            $index_file = file_get_contents($index_blade_file);
+            foreach ($this->foreign_table as $table) {
+                foreach ($this->display_key as  $key) {
+                    array_push($foriegn_data, $table."_|_".$key);
+                }
             }
-        }
-        $foriegn_data = array_values(array_unique($foriegn_data));
-        $foriegn_data_foriegn_key = array_combine($foriegn_data, $this->foriegn_key);
-        foreach($foriegn_data_foriegn_key as $data => $key){
-            $relation_name = Str::singular(strtok($data, '_|_'));
-            $local_key = Str::singular($this->local_table);
-            $relation_key = substr($data, strpos($data, '_|_') + 3);
-            $index_file = str_replace("$$local_key->$key", "$$local_key->$relation_name->$relation_key", $index_file);
-            $index_file = str_replace("<td>".Str::title($key)."</td>", "<td>".Str::title($relation_name)."</td>", $index_file);
-            $index_file = str_replace("<th>".ucfirst($key)."</th>", "<th>".ucfirst($relation_name)."</th>", $index_file);
-            file_put_contents(base_path() . "/resources/views/grace/$this->local_table/index.blade.php", $index_file);
+            $foriegn_data = array_values(array_unique($foriegn_data));
+            $foriegn_data_foriegn_key = array_combine($foriegn_data, $this->foriegn_key);
+            foreach($foriegn_data_foriegn_key as $data => $key){
+                $relation_name = Str::singular(strtok($data, '_|_'));
+                $local_key = Str::singular($this->local_table);
+                $relation_key = substr($data, strpos($data, '_|_') + 3);
+                $index_file = str_replace("$$local_key->$key", "$$local_key->$relation_name->$relation_key", $index_file);
+                $index_file = str_replace("<td>".Str::title($key)."</td>", "<td>".Str::title($relation_name)."</td>", $index_file);
+                $index_file = str_replace("<th>".ucfirst($key)."</th>", "<th>".ucfirst($relation_name)."</th>", $index_file);
+                file_put_contents(base_path() . $index_blade_file, $index_file);
+            }
         }
     }
 

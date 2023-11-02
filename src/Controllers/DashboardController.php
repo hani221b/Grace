@@ -5,10 +5,10 @@ namespace Hani221b\Grace\Controllers;
 use App\Models\Language;
 use App\Models\Table;
 use Exception;
+use Hani221b\Grace\Support\Core;
 use Hani221b\Grace\Support\File;
 use Hani221b\Grace\Support\Str;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class DashboardController
@@ -228,13 +228,8 @@ class DashboardController
     public function add_relation($id)
     {
         $table = Table::where('id', $id)->first();
-        $db_tables = [];
         $db_fields = [];
-        $property = 'Tables_in_' . config('database.connections.mysql.database');
-        foreach (DB::select('SHOW TABLES') as $db_table) {
-            array_push($db_tables, $db_table->$property);
-        }
-
+        $db_tables = Core::getAllTables();
         $db_tables = array_diff($db_tables, ['failed_jobs', 'languages', 'migrations', 'password_resets', 'personal_access_tokens', 'tables', $table->table_name]);
         $db_tables = array_values($db_tables);
         foreach ($db_tables as $db_table) {
