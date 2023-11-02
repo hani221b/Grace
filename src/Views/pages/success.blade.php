@@ -7,7 +7,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.x/css/materialdesignicons.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="{{ asset('grace/assets/css/dist/vuetify.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vuetify/2.6.16/vuetify.css" integrity="sha512-P8e5EskR1yDRrv7VJ+EwmIlF1BxMl3wwmQhVo0kmUosUDVKG73CT2oKmVDxfmyttVXiTeuokHvdyX4nprgWi6g==" crossorigin="anonymous" referrerpolicy="no-referrer" />    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui" />
     <title>Grace - Add Relation</title>
     <style>
         /* Helper classes */
@@ -51,8 +51,8 @@
         </v-container>
     </div>
 </body>
-<script src="{{ asset('grace/assets/js/dist/vue.js') }}"></script>
-<script src="{{ asset('grace/assets/js/dist/vuetify.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue@2.7.14/dist/vue.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vuetify/2.6.16/vuetify.min.js" integrity="sha512-17vpuR3wiDiOIvkkHmJ1m6u7htfIhu0qhQ1TKKFUzWdkyLJgid2NFfvymK8GjyArBFKRNlgbW0uDW0O7ScVH4A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
 </html>
 

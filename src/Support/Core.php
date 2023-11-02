@@ -3,6 +3,7 @@
 namespace Hani221b\Grace\Support;
 
 use Hani221b\Grace\Support\Str;
+use Illuminate\Support\Facades\DB;
 use ReflectionMethod;
 use ReflectionClass;
 
@@ -97,5 +98,21 @@ class Core
         $body = implode("", array_slice($source, $start_line, $length));
         $source_code = Str::getBetween($body, "{", "// The end of the class [DO NOT REMOVE THIS COMMENT]");
         return $source_code;
+    }
+
+    public static function getAllTables(): array
+    {
+        $db_tables = [];
+        if(DB::connection()->getDriverName() === "pgsql"){
+            $property = "table_name";
+            $all_tables = DB::select("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'");
+        } else {
+            $property = 'Tables_in_' . config('database.connections.mysql.database');
+            $all_tables = DB::select('SHOW TABLES');
+        }
+        foreach ($all_tables as $db_table) {
+            array_push($db_tables, $db_table->$property);
+        }
+        return $db_tables;
     }
 }
