@@ -1,5 +1,0 @@
-src/public/* linguist-vendored
-*.php linguist-language=php
-*.blade.php linguist-language=php
-*.js linguist-language=javaScript
-*.css linguist-language=css

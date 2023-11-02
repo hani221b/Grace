@@ -35,6 +35,7 @@ class CreateFullResource extends Controller
     protected $files_fields;
     protected $fillable_files_array;
     protected $input_types;
+    protected $singular_class_name;
 
     public function __construct(Filesystem $file_sys, Request $request)
     {
@@ -60,6 +61,7 @@ class CreateFullResource extends Controller
         $this->storage_path = $request->storage_path;
         $this->single_record_table = $request->single_record_table;
         $this->select_options = $request->select_options;
+        $this->singular_class_name = GraceStr::singularClass($this->table_name);
     }
 
     public function executeFileCreation()
@@ -85,10 +87,10 @@ class CreateFullResource extends Controller
             $this->executeFileCreation();
             Table::create([
                 'table_name' => $this->table_name,
-                'controller' => $this->controller_namespace . '/' . GraceStr::singularClass($this->table_name) . 'Controller',
-                'model' => $this->model_namespace . '/' . GraceStr::singularClass($this->table_name),
-                'request' => $this->request_namespace . '/' . GraceStr::singularClass($this->table_name) . 'Request',
-                'resource' => $this->resource_namespace . '/' . GraceStr::singularClass($this->table_name) . "Resource",
+                'controller' => "{$this->controller_namespace}/{$this->singular_class_name}Controller",
+                'model' => $this->model_namespace . '/' . $this->singular_class_name,
+                'request' => $this->request_namespace . '/' . $this->singular_class_name . 'Request',
+                'resource' => $this->resource_namespace . '/' . $this->singular_class_name . "Resource",
                 'migration' => $this->migration_namespace . '/' . date("Y_m_d") . "_" . $_SERVER['REQUEST_TIME']
                     . "_create_" . GraceStr::pluralLower($this->table_name) . "_table",
                 'views' => config('grace.views_folder_name') . '/' . $this->table_name,
@@ -112,7 +114,7 @@ class CreateFullResource extends Controller
     {
         return [
             'namespace' => GraceStr::namespaceCorrection($this->model_namespace),
-            'class_name' => GraceStr::singularClass($this->table_name),
+            'class_name' => $this->singular_class_name,
             'table_name' => $this->table_name,
             'fillable_array' => Factory::modelFillableArray($this->field_names),
             'storage_path' => $this->storage_path,
@@ -122,13 +124,15 @@ class CreateFullResource extends Controller
 
     public function getControllerVariables()
     {
+        $singular_class_name = $this->singular_class_name;
+
         return [
             'namespace' => GraceStr::namespaceCorrection($this->controller_namespace),
-            'model_path' =>  GraceStr::namespaceCorrection($this->model_namespace) . "\\" . GraceStr::singularClass($this->table_name),
-            'resource_path' => GraceStr::namespaceCorrection($this->resource_namespace)  . "\\" . GraceStr::singularClass($this->table_name) . "Resource",
-            'request_path' => GraceStr::namespaceCorrection($this->request_namespace)  . "\\" . GraceStr::singularClass($this->table_name) . "Request",
-            'request_class' => GraceStr::singularClass($this->table_name) . "Request",
-            'class_name' => GraceStr::singularClass($this->table_name) . 'Controller',
+            'model_path' =>  GraceStr::namespaceCorrection($this->model_namespace) . "\\" . $this->singular_class_name,
+            'resource_path' => GraceStr::namespaceCorrection($this->resource_namespace)  . "\\" . $this->singular_class_name . "Resource",
+            'request_namespace' => GraceStr::namespaceCorrection($this->request_namespace)  . "\\" . $this->singular_class_name . "Request",
+            'request_class' => $this->singular_class_name . "Request",
+            'class_name' => $this->singular_class_name . 'Controller',
             'table_name' => $this->table_name,
             'fillable_array' => Core::fillableArray($this->field_names, $this->files_fields),
             'fillable_files_array' => Core::filesFillableArray($this->files_fields),
@@ -139,7 +143,7 @@ class CreateFullResource extends Controller
     {
         return [
             'namespace' => GraceStr::namespaceCorrection($this->request_namespace),
-            'class_name' => GraceStr::singularClass($this->table_name) . 'Request',
+            'class_name' => $this->singular_class_name . 'Request',
             'table_name' => $this->table_name,
 
         ];
@@ -149,7 +153,7 @@ class CreateFullResource extends Controller
     {
         return [
             'namespace' => GraceStr::namespaceCorrection($this->resource_namespace),
-            'class_name' => GraceStr::singularClass($this->table_name) . "Resource",
+            'class_name' => $this->singular_class_name . "Resource",
 
         ];
     }
@@ -158,7 +162,7 @@ class CreateFullResource extends Controller
     {
         return [
             'table_name' => $this->table_name,
-            'controller_name' => GraceStr::singularClass($this->table_name) . "Controller",
+            'controller_name' => $this->singular_class_name . "Controller",
             'controller_namespace' => GraceStr::namespaceCorrection($this->controller_namespace),
         ];
     }
