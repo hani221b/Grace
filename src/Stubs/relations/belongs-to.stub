@@ -1,0 +1,6 @@
+/*<{{ LOCAL_TABLE }}-{{ SINGLE_FOREIGN_TABLE_NAME }}-relation>*/
+public function {{ SINGLE_FOREIGN_TABLE_NAME }}()
+{
+    return $this->belongsTo({{ FOREIGN_MODEL }}::class, "{{ FOREIGN_KEY }}", "{{ LOCAL_KEY }}");
+}
+/*</{{ LOCAL_TABLE }}-{{ SINGLE_FOREIGN_TABLE_NAME }}-relation>*/

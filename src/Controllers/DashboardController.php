@@ -2,106 +2,67 @@
 
 namespace Hani221b\Grace\Controllers;
 
-use App\Models\Language;
-use App\Models\Table;
-use Exception;
+use Hani221b\Grace\Models\Language;
+use Hani221b\Grace\Models\Table;
 use Hani221b\Grace\Support\Core;
 use Hani221b\Grace\Support\File;
 use Hani221b\Grace\Support\Str;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\View\View;
 
 class DashboardController
 {
-    public function grace_cp()
+    public function grace_cp(): View
     {
         return view('Grace::pages.main');
     }
 
-    /**
-     * get user dashboard
-     */
-
-    public function get_dashboard()
+    public function get_dashboard(): View
     {
         return view('Grace::Grace.dashboard');
     }
 
-    /**
-     * get all languages
-     */
-
-    public function get_languages()
+    public function get_languages(): View
     {
-        try {
-            $languages = Language::Selection()->get();
-            return view('grace.languages.index', compact('languages'));
-        } catch (Exception $exception) {
-            return 'something went wrong. please try again later';
-        }
+        $languages = Language::Selection()->get();
+        return view('grace.languages.index', compact('languages'));
     }
-    /**
-     * return success page
-     */
-    public function success(){
+
+    public function success()
+    {
         return view('Grace::pages.success');
     }
 
-    /**
-     * make a language active of inactive
-     */
 
-    public function change_status_for_language($id)
+    public function changeStatusForLanguage(int $id): RedirectResponse
     {
-        try {
-            $language = Language::where('id', $id)->select('id', 'status')->first();
-            $status = $language->status == 0 ? 1 : 0;
-            //update the status with the new value
-            $language->update(['status' => $status]);
-            return \redirect()->back();
-        } catch (Exception $exception) {
-            return 'something went wrong. please try again later';
-        }
+        $language = Language::where('id', $id)->select('id', 'status')->first();
+        $status = $language->status == 0 ? 1 : 0;
+        $language->update(['status' => $status]);
+        return redirect()->back();
     }
 
-    /**
-     * override system config and change default language
-     */
 
-    public function set_language_to_default($id)
+    public function setLanguageAsDefault(int $id): RedirectResponse
     {
-        try {
-            // setting default language back to non default
-            $default_language = Language::where('default', 1)->select('id', 'default')->first();
-            $default_language->update(['default' => 0]);
-            // setting new default language
-            $language = Language::where('id', $id)->select('id', 'default')->first();
-            $language->update(['default' => 1]);
-            return \redirect()->back();
-        } catch (Exception $exception) {
-            return 'something went wrong. please try again later';
-        }
+        $default_language = Language::where('default', 1)->select('id', 'default')->first();
+        $default_language->update(['default' => 0]);
+        $language = Language::where('id', $id)->select('id', 'default')->first();
+        $language->update(['default' => 1]);
+        return redirect()->back();
     }
 
-    /**
-     * get all tables
-     */
-
-    public function get_tables()
+    public function getTables(): View
     {
-        try {
-            $tables = Table::get();
-            return view('Grace::pages.tables', compact('tables'));
-        } catch (Exception $exception) {
-            return 'something went wrong. please try again later';
-        }
+        $tables = Table::get();
+        return view('Grace::pages.tables', compact('tables'));
     }
 
-    /**
-     * delete table with all its files and classes
-     */
-    public function delete_table($id)
+
+    public function delete_table(int $id): RedirectResponse
     {
         $table = Table::where('id', $id)->first();
         $resources = [
@@ -129,8 +90,7 @@ class DashboardController
         $new_route_file = str_replace($full_route, '', $route_file);
         file_put_contents($route_file_name, $new_route_file);
 
-        //remove route controlle use statement
-
+        //remove route controller use statement
         $use_statement_start = "/*<$table->table_name-controller>*/";
         $use_statement_end = "/*</$table->table_name-controller>*/";
         $use_statement = Str::getBetween($route_file, $use_statement_start, $use_statement_end);
@@ -139,7 +99,6 @@ class DashboardController
         file_put_contents($route_file_name, $new_route_file);
 
         //remove disk
-
         $disk_start = "/*<$table->table_name-disk>*/";
         $disk_end = "/*</$table->table_name-disk>*/";
         $file_system = base_path() . '/config/filesystems.php';
@@ -150,7 +109,6 @@ class DashboardController
         file_put_contents($file_system, $new_file_system);
 
         //remove sidebar list item
-
         $sidebar_item_start = "<!--<$table->table_name>-->";
         $sidebar_item_end = "<!--</$table->table_name>-->";
         $sidebar_file = base_path() . '/resources/views/grace/includes/sidebar.blade.php';
@@ -163,25 +121,20 @@ class DashboardController
         }
 
         //remove views
-
         File::deleteDir(base_path() . '/resources/views/' . config('grace.views_folder_name') . '/' . $table->table_name);
 
         //remove table
-
         Schema::dropIfExists($table->table_name);
 
         //delete from table's table
-
         $table->delete();
 
         Artisan::call("cache:clear");
         return redirect()->route('success');
     }
 
-    /**
-     * Adding validation rules on the fields of specific table
-     */
-    public function add_validation($id)
+
+    public function addValidationRulesOnFields(int $id): View
     {
         $table = Table::where('id', $id)->first();
         $fields = array_diff(Schema::getColumnListing($table->table_name), ['id', 'translation_lang', 'translation_of', 'status', 'order', 'created_at', 'updated_at', 'deleted_at']);
@@ -189,10 +142,7 @@ class DashboardController
         return view('Grace::pages.validations', compact('fields', 'id'));
     }
 
-    /**
-     * Adding validation rule on the fields of specific table
-     */
-    public function submit_validation(Request $request)
+    public function submitValidationRulesOnFields(Request $request): RedirectResponse
     {
         $table = Table::where('id', $request->table_id)->select('request', 'table_name')->first();
         $request_file = file_get_contents(base_path() . '/' . $table->request . '.php');
@@ -226,10 +176,8 @@ class DashboardController
         return redirect()->route('success');
     }
 
-    /**
-     * retuns the view for adding relations for for models
-     */
-    public function add_relation($id)
+
+    public function getAddRelation(int $id): View
     {
         $table = Table::where('id', $id)->first();
         $db_fields = [];
