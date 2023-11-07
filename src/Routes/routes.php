@@ -8,6 +8,7 @@ use Hani221b\Grace\Controllers\StubsControllers\CreateMigration;
 use Hani221b\Grace\Controllers\StubsControllers\CreateModel;
 use Hani221b\Grace\Controllers\StubsControllers\CreateRequest;
 use Hani221b\Grace\Controllers\StubsControllers\CreateResource;
+use Hani221b\Grace\Controllers\Validations\ValidationController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('grace_cp', [DashboardController::class, 'grace_cp'])->name('factory');
@@ -35,7 +36,7 @@ Route::get('dashboard/languages/set_to_default/{id}', [DashboardController::clas
 
 Route::get('grace_tables', [DashboardController::class, 'getTables'])->name('grace_tables');
 Route::get('delete_table/{id}', [DashboardController::class, 'delete_table'])->name('delete_table');
-Route::get('add_validation/{id}', [DashboardController::class, 'addValidationRulesOnFields'])->name('add_validation');
-Route::post('submit_validation', [DashboardController::class, 'submitValidationRulesOnFields'])->name('submit_validation');
+Route::get('add_validation/{id}', [ValidationController::class, 'getAddValidationRulesOnFields'])->name('add_validation');
+Route::post('submit_validation', [ValidationController::class, 'submitValidationRulesOnFields'])->name('submit_validation');
 Route::get('add_relation/{id}', [DashboardController::class, 'getAddRelation'])->name('add_relation');
 Route::post('submit_relations', [RelationController::class, 'addRelationToModel'])->name('submit_relations');
