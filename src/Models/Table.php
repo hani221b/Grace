@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace Hani221b\Grace\Models;
 
 use Illuminate\Database\Eloquent\Model;
 

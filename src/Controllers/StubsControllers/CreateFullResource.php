@@ -3,7 +3,7 @@
 namespace Hani221b\Grace\Controllers\StubsControllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\Table;
+use Hani221b\Grace\Models\Table;
 use Hani221b\Grace\Support\Core;
 use Hani221b\Grace\Support\Factory;
 use Hani221b\Grace\Support\File;

@@ -1,27 +1,24 @@
 <?php
 
-namespace Hani221b\Grace\Controllers\RelationControllers;
+namespace Hani221b\Grace\Controllers\Relations;
 
-use App\Models\Table;
-use App\Models\Relation;
+use Hani221b\Grace\Models\Table;
+use Hani221b\Grace\Models\Relation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Hani221b\Grace\Support\Str as GraceStr;
-use Hani221b\Grace\Support\Stub;
-use Illuminate\Support\Facades\Artisan;
+use Illuminate\Http\RedirectResponse;
+use Hani221b\Grace\Controllers\Relations\Utilities\RelationTemplate;
 
-class SubmitRelationController
+class RelationController
 {
-
-    private $relation_type;
-    private $local_table;
-    private $foreign_table;
-    private $single_foreign_table_name;
-    private $foreign_model;
-    private $local_key;
-    private $foriegn_key;
-    private $display_key;
-    private $pivot_table;
+    protected $relation_type;
+    protected $local_table;
+    protected $foreign_table;
+    protected $local_key;
+    protected $foriegn_key;
+    protected $display_key;
+    protected $pivot_table;
 
     public function __construct(Request $request)
     {
@@ -33,11 +30,8 @@ class SubmitRelationController
         $this->display_key = $request->display_key;
         $this->pivot_table = $request->pivot_table;
     }
-    /**
-     * Adding desired relation for the named model
-     * @return void
-     */
-    public function submit_relations()
+
+    public function addRelationToModel(): RedirectResponse
     {
         $relations_array = array();
         $template = array();
@@ -72,19 +66,19 @@ class SubmitRelationController
             ];
             switch ($single_relation['relation_type']) {
                 case 'HasOne':
-                    $relation_template = self::has_one($single_relation['foreign_table'], $single_relation['foreign_key'], $single_relation['local_key']);
-                    break;
-
-                case 'BelongsTo':
-                    $relation_template = self::belongs_to($single_relation['foreign_table'], $single_relation['foreign_key'], $single_relation['local_key']);
+                    $relation_template = RelationTemplate::hasOne($single_relation);
                     break;
 
                 case 'HasMany':
-                    $relation_template = self::has_many($single_relation['foreign_table'], $single_relation['foreign_key'], $single_relation['local_key'], $single_relation['pivot_table']);
+                    $relation_template = RelationTemplate::haMany($single_relation);
+                    break;
+
+                case 'BelongsTo':
+                    $relation_template = RelationTemplate::belongsTo($single_relation);
                     break;
 
                 case 'BelongsToMany':
-                    $relation_template = self::belongs_to_many($single_relation['foreign_table'], $single_relation['foreign_key'], $single_relation['local_key'], $single_relation['pivot_table']);
+                    $relation_template = RelationTemplate::belongsToMany($single_relation);
                     break;
             }
             array_push($template, $relation_template);
@@ -117,14 +111,10 @@ class SubmitRelationController
         $this->appendIndexFields();
 
         return redirect()->route('success');
-
     }
 
-    /**
-     * Append create fields for the relation in create.blade.php file
-     * @return void
-     */
-    public function appendCreateFields(){
+    public function appendCreateFields(): void
+    {
         $foreign_tables_keys = array_combine($this->foreign_table, $this->foriegn_key);
         foreach ($foreign_tables_keys as $foriegn_table => $foriegn_key) {
             //store record in db
@@ -137,7 +127,7 @@ class SubmitRelationController
             if(file_exists($blade_create_file)){
                 $create_file_content = file_get_contents($blade_create_file);
                 $create_form = GraceStr::getBetween( $create_file_content, "<!--<$this->local_table-form>-->","<!--</$this->local_table-form>-->");
-                $new_create_form = $create_form . $this->create($foriegn_table, $foriegn_key);
+                $new_create_form = $create_form . $this->createFieldTemplate($foriegn_table, $foriegn_key);
                 $new_create_form = preg_replace('/\\\\/', '', $new_create_form);
                 $create_file_content = str_replace($create_form, $new_create_form, $create_file_content);
                 file_put_contents($blade_create_file ,$create_file_content);
@@ -145,11 +135,8 @@ class SubmitRelationController
         }
     }
 
-    /**
-     * Append edit fields for the relation in edit.blade.php file
-     * @return void
-     */
-    public function appendEditFields($start_marker, $end_marker, $index){
+    public function appendEditFields(string $start_marker, string $end_marker, string $index): void
+    {
         $foreign_tables_keys = array_combine($this->foreign_table, $this->foriegn_key);
         foreach ($foreign_tables_keys as $foriegn_table => $foriegn_key) {
             //append relation field in create.blade.pho file
@@ -157,7 +144,7 @@ class SubmitRelationController
             if(file_exists($blade_edit_file)){
                 $edit_file_content = file_get_contents($blade_edit_file);
                 $edit_form = GraceStr::getBetween($edit_file_content, $start_marker, $end_marker);
-                $new_edit_form = $edit_form . $this->edit($foriegn_table, $foriegn_key, $index);
+                $new_edit_form = $edit_form . $this->editFieldTemplate($foriegn_table, $foriegn_key, $index);
                 $new_edit_form = preg_replace('/\\\\/', '', $new_edit_form);
                 $edit_file_content = str_replace($edit_form, $new_edit_form, $edit_file_content);
                 file_put_contents($blade_edit_file ,$edit_file_content);
@@ -165,11 +152,8 @@ class SubmitRelationController
         }
     }
 
-    /**
-     * Append index fields for the relation in index.blade.php file
-     * @return void
-     */
-    public function appendIndexFields(){
+    public function appendIndexFields(): void
+    {
         $foriegn_data = [];
         $index_blade_file = base_path() . "/resources/views/grace/$this->local_table/index.blade.php";
         if(file_exists($index_blade_file)){
@@ -193,102 +177,8 @@ class SubmitRelationController
         }
     }
 
-    /**
-     * Defining the template of hasOne relation
-     * @param $foriegn_table
-     * @return String
-     */
-    public function has_one($foreign_table, $foriegn_key, $local_key)
+    public function createFieldTemplate(string $foreign_table, string $field): string
     {
-        $foriegn_model = GraceStr::singularClass($foreign_table);
-        $single_foreign_table_name = Str::singular($foreign_table);
-        return "
-        /*<$this->local_table-$single_foreign_table_name-relation>*/
-        public function $single_foreign_table_name()
-        {
-            return \$this->hasOne($foriegn_model::class, '$foriegn_key', '$local_key');
-        }
-        /*</$this->local_table-$single_foreign_table_name-relation>*/
-        ";
-    }
-
-    /**
-     * Defining the template of hasMany relation
-     * @param $foriegn_table
-     * @return String
-     */
-    public function has_many($foreign_table, $foriegn_key, $local_key, $pivot_table)
-    {
-        if($pivot_table == null){
-            $foriegn_model = GraceStr::singularClass($foreign_table)."::class";
-        } else {
-            $foriegn_model = "'$pivot_table'";
-        }
-        return "
-        /*<$this->local_table-$foreign_table-relation>*/
-        public function $foreign_table()
-        {
-            return \$this->hasMany($foriegn_model, '$foriegn_key', '$local_key');
-        }
-        /*</$this->local_table-$foreign_table-relation>*/
-        ";
-    }
-
-    /**
-     * Defining the template of belongsTo relation
-     * @param $foriegn_table
-     * @return String
-     */
-    public function belongs_to($foreign_table, $foriegn_key, $local_key)
-    {
-
-        $foriegn_model = GraceStr::singularClass($foreign_table);
-        $single_foreign_table_name = Str::singular($foreign_table);
-        return "
-        /*<$this->local_table-$single_foreign_table_name-relation>*/
-        public function $single_foreign_table_name()
-        {
-            return \$this->belongsTo($foriegn_model::class, '$foriegn_key', '$local_key');
-        }
-        /*</$this->local_table-$single_foreign_table_name-relation>*/
-        ";
-    }
-
-    /**
-     * Defining the template of belongsToMany relation
-     * @param $foriegn_table
-     * @return String
-     */
-    public function belongs_to_many($foreign_table, $foriegn_key, $local_key, $pivot_table)
-    {
-        if($pivot_table == null){
-            $foriegn_model = GraceStr::singularClass($foreign_table)."::class";
-        } else {
-            $foriegn_model = GraceStr::singularClass($foreign_table)."::class, '$pivot_table'";
-        }
-        $foreign_id = Str::singular($foreign_table)."_id";
-        $local_id = Str::singular($this->local_table)."_id";
-
-        $single_foreign_table_name = Str::singular($foreign_table);
-
-        $pivotStubsVariables = [
-            'field_names'=>[$foreign_id, $local_id],
-            'field_types'=>['integer','integer'],
-        ];
-
-        $this->create_pivot_table($pivotStubsVariables);
-
-        return "
-        /*<$this->local_table-$single_foreign_table_name-relation>*/
-        public function $single_foreign_table_name()
-        {
-            return \$this->belongsToMany($foriegn_model, '$local_id', '$foreign_id');
-        }
-        /*</$this->local_table-$single_foreign_table_name-relation>*/
-        ";
-    }
-
-    public function create($foreign_table, $field){
         $capital_foreign_table = Str::title($foreign_table);
         $singular_foreign_table = Str::singular($foreign_table);
         return "
@@ -302,7 +192,9 @@ class SubmitRelationController
     </div>
         ";
     }
-    public function edit($foreign_table, $field, $index){
+
+    public function editFieldTemplate(string $foreign_table, string $field, string $index): string
+    {
         $capital_foreign_table = Str::title($foreign_table);
         $singular_foreign_table = Str::singular($foreign_table);
         $singular_local_table = Str::singular($this->local_table);
@@ -318,16 +210,4 @@ class SubmitRelationController
         ";
     }
 
-    public function create_pivot_table($pivotStubsVariables)
-    {
-        $content = Stub::getMigrationStubContents(__DIR__ . "/../../Stubs/migration.pivot.stub", $pivotStubsVariables);
-        $foreign_table = Str::plural(str_replace('_id', '', $pivotStubsVariables['field_names'][0]));
-        $local_table = Str::plural(str_replace('_id', '', $pivotStubsVariables['field_names'][1]));
-        $table_name = $foreign_table."_".$local_table;
-        $file_name =  date("Y_m_d") . "_" . $_SERVER['REQUEST_TIME']
-            . "_create_".$table_name."_table" . '.php';
-            $content = str_replace("{{ table_name }}", $table_name, $content);
-            file_put_contents( base_path() . '/database/migrations/' .$file_name, $content);
-            Artisan::call('migrate', ['--path'=>  '/database/migrations/'.$file_name]);
-    }
 }
