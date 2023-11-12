@@ -2,7 +2,7 @@
 
 namespace Hani221b\Grace\Operations;
 
-use App\Models\Relation;
+use Hani221b\Grace\Models\Relation;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 

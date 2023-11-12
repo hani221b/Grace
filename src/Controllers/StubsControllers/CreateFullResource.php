@@ -61,7 +61,9 @@ class CreateFullResource extends Controller
         $this->storage_path = $request->storage_path;
         $this->single_record_table = $request->single_record_table;
         $this->select_options = $request->select_options;
-        $this->singular_class_name = GraceStr::singularClass($this->table_name);
+        if($this->table_name !== null){
+            $this->singular_class_name = GraceStr::singularClass($this->table_name);
+        }
     }
 
     public function executeFileCreation()
@@ -235,13 +237,13 @@ class CreateFullResource extends Controller
         Sidebar::append($this->getSidebarViewVariables());
     }
 
-    public function makeFileAlive(array $StubV_ariables, string $type, string $path, string $suffix): void
+    public function makeFileAlive(array $Stub_variables, string $type, string $path, string $suffix): void
     {
         $source_file_path = Factory::getSourceFilePath($type);
         $source_file = Factory::getSourceFile($type);
         $type = Factory::getResourceType($type, $this->single_record_table);
         $path = \call_user_func($source_file_path, $path, $this->table_name, $suffix);
-        $contents = \call_user_func($source_file, $StubV_ariables, $type);
+        $contents = \call_user_func($source_file, $Stub_variables, $type);
         File::makeDirectory($this->file_sys, dirname($path));
         File::put($this->file_sys, $path, $contents);
         Factory::MigrateTable($type, $path);

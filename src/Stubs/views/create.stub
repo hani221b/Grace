@@ -5,7 +5,7 @@ $langauges = \App\Models\Language::Selection()
 $languages_count = \App\Models\Language::count();
 @endphp
 
-@extends('grace.grace_layout')
+@extends('grace.dashboard')
 
 @section('content')
     <div class="content-body">

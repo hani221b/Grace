@@ -1,0 +1,9 @@
+<!--<{{ TABLE_NAME }}>-->
+<li class="nav-item">
+    <a class="nav-link d-flex align-items-center gap-2" href="{{ route("grace.{{ TABLE_NAME }}.index") }}"
+        style="cursor: pointer">
+        <i class="bi bi-table"></i>
+        {{ LABEL }}
+    </a>
+</li>
+<!--</{{ TABLE_NAME }}>-->
