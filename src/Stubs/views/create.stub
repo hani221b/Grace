@@ -1,8 +1,8 @@
 @php
-$langauges = \App\Models\Language::Selection()
+$langauges = \Hani221b\Grace\Models\Language::Selection()
     ->Active()
     ->get();
-$languages_count = \App\Models\Language::count();
+$languages_count = \Hani221b\Grace\Models\Language::count();
 @endphp
 
 @extends('grace.dashboard')

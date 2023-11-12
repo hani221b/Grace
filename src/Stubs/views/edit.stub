@@ -34,15 +34,14 @@
                                 <h4 class="card-title">Translations</h4>
                                 <!-- Show translations -->
                                 <div class="custom-tab-1">
-                                    <ul class="nav nav-tabs mb-3">
-                                        @foreach (${{ key }}->translations as $index => $translation)
-                                            <li class="nav-item @if ($index == 0) active @endif"><a
-                                                    class="nav-link @if ($index == 0) active @endif"
-                                                    data-toggle="tab" href="#translation{{ $index }}"
-                                                    aria-expanded="{{ $index == 0 ? 'true' : 'false' }}">{{ $translation->translation_lang }}</a>
-                                            </li>
+                                     <ul class="nav nav-tabs">
+                                        @foreach ($item->translations as $index => $translation)
+                                        <li class="nav-item">
+                                            <a class="nav-link @if ($index == 0) active @endif" data-bs-toggle="tab" 
+                                                href="#translation{{ $index }}">{{ $translation->translation_lang }}</a>
+                                          </li>
                                         @endforeach
-                                    </ul>
+                                      </ul>
                                         <form method="POST" action="{{ url }}"
                                             enctype="multipart/form-data">
                                             @csrf

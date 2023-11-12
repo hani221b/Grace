@@ -10,12 +10,12 @@ class Sidebar
     {
  
         $table_name = $stubVariables['table_name'];
-        $single_record_table = $stubVariables['single_record_table'];
-        if ($single_record_table === null) {
-            $row = self::regularTemplate($table_name);
-        } else if ($single_record_table === "1") {
-            $row = self::singleRecordTemplate($table_name);
-        }
+        // $single_record_table = $stubVariables['single_record_table'];
+        // if ($single_record_table === null) {
+            $row = self::sidebarItemTemplate($table_name);
+        // } else if ($single_record_table === "1") {
+        //     $row = self::singleRecordTemplate($table_name);
+        // }
 
         $filename = base_path()  . '/resources/views/grace/includes/sidebar.blade.php';
         $line_i_am_looking_for = 17;
@@ -25,23 +25,23 @@ class Sidebar
         return false;
     }
 
-    public static function regularTemplate($table_name)
+    public static function sidebarItemTemplate($table_name)
     {
         $label = ucfirst($table_name);
         $stubVariables = [
             "TABLE_NAME" => $table_name,
             "LABEL" => $label
         ];
-       return Stub::getStubContents(__DIR__ . "../../../Stubs/dashboard/sidebar-item-regular.stub", $stubVariables);
+       return Stub::getStubContents(__DIR__ . "../../../Stubs/dashboard/sidebar.stub", $stubVariables);
     }
 
-    public static function singleRecordTemplate($table_name)
-    {
-        $label = ucfirst($table_name);
-        $stubVariables = [
-            "TABLE_NAME" => $table_name,
-            "LABEL" => $label
-        ];
-       return Stub::getStubContents(__DIR__ . "../../../Stubs/dashboard/sidebar-item-regular.stub", $stubVariables);
-    }
+    // public static function singleRecordTemplate($table_name)
+    // {
+    //     $label = ucfirst($table_name);
+    //     $stubVariables = [
+    //         "TABLE_NAME" => $table_name,
+    //         "LABEL" => $label
+    //     ];
+    //    return Stub::getStubContents(__DIR__ . "../../../Stubs/dashboard/sidebar-item-regular.stub", $stubVariables);
+    // }
 }
