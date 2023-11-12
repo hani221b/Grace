@@ -22,7 +22,7 @@ class DashboardController
 
     public function get_dashboard(): View
     {
-        return view('Grace::Grace.dashboard');
+        return view('grace.dashboard');
     }
 
     public function get_languages(): View

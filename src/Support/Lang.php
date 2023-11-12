@@ -1,7 +1,7 @@
 <?php
 
 namespace Hani221b\Grace\Support;
-use App\Models\Language;
+use Hani221b\Grace\Models\Language;
 
 class Lang {
     public static function GetDefaultLanguage()

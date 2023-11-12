@@ -12,7 +12,7 @@ use Hani221b\Grace\Controllers\Validations\ValidationController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('grace_cp', [DashboardController::class, 'grace_cp'])->name('factory');
-Route::get('dashboard', [DashboardController::class, 'get_dashboard']);
+Route::get('dashboard', [DashboardController::class, 'get_dashboard'])->name("grace_dashboard");
 Route::get('success', [DashboardController::class, 'success'])->name('success');
 
 Route::post('create_model', [CreateModel::class, 'makeAlive'])->name('makeModelAlive');

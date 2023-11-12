@@ -57,6 +57,15 @@
                                             <v-list-item-title>Tables</v-list-item-title>
                                         </v-list-item-content>
                                     </v-list-item>
+                                    <v-list-item href="{{ route('grace_dashboard') }}" link>
+                                        <v-list-item-icon>
+                                            <span class="mdi mdi-view-dashboard"></span>
+                                        </v-list-item-icon>
+
+                                        <v-list-item-content>
+                                            <v-list-item-title>Dashboard</v-list-item-title>
+                                        </v-list-item-content>
+                                    </v-list-item>
                                 </v-list>
                             </v-navigation-drawer>
                         </v-col>
