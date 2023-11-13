@@ -48,6 +48,7 @@ class Create
                     foreach($select_options as $options){;
                         $input_template = self::select($field, $table_name, $options);
                     }
+                    break;
                 case 'relation':
                         $input_template = '';
                     break;

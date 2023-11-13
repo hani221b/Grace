@@ -35,7 +35,7 @@
                                 <!-- Show translations -->
                                 <div class="custom-tab-1">
                                      <ul class="nav nav-tabs">
-                                        @foreach ($item->translations as $index => $translation)
+                                        @foreach (${{ key }}->translations as $index => $translation)
                                         <li class="nav-item">
                                             <a class="nav-link @if ($index == 0) active @endif" data-bs-toggle="tab" 
                                                 href="#translation{{ $index }}">{{ $translation->translation_lang }}</a>

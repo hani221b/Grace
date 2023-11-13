@@ -53,12 +53,11 @@ class Edit
                     break;
 
                 case 'select':
-                    foreach ($select_options as $options) {;
-                        $input_template = self::select($field, $folder_name, $options, $field_name, $error);
-                    }
-                    case 'relation':
-                        $input_template = '';
+                        $input_template = self::select($folder_name, $field, Str::singular($folder_name), $field_name, $error, $select_options);
                     break;
+                case 'relation':
+                    $input_template = '';
+                break;
             }
             array_push($template, $input_template);
         }
@@ -90,6 +89,10 @@ class Edit
                 case 'textarea':
                     $translation_input_template = self::textarea($folder_name, $field, 'translation', $translation_field_name, $translation_error);
                     break;
+                case 'select':
+                        $translation_input_template = self::select($folder_name, $field, "translation", $translation_field_name, $translation_error, $select_options);
+                    break;
+                    
             }
             array_push($translations_template, $translation_input_template);
         }
@@ -100,7 +103,6 @@ class Edit
         }
 
         $contents = str_replace('{{ translations_inputs }}', $translations_string_input_template, $contents);
-        // dd($contents);
         foreach ($stubVariables as $search => $replace) {
 
             if (!is_array($replace)) {
@@ -184,18 +186,18 @@ class Edit
      * @return String
      */
 
-    public static function select($field, $table_name, $select_options, $field_name, $error)
+    public static function select($table_name, $field,  $key, $field_name, $error, $select_options)
     {
 
         $list_of_options = '';
-        $options = explode(',', $select_options);
+        $options = explode(',', $select_options[0]);
         foreach ($options as $option) {
-            $list_of_options .= "<option value='$option'>" . $option . '</option>' . "\n";
+            $list_of_options .= "<option {{ ( \$$key->$field == '$option') ? 'selected' : '' }} value='$option'>" . $option . '</option>' . "\n";
         }
-        $title = ucfirst($field);
+        $title = ucfirst($table_name);
         return "<div class='form-group'>
         <label>{$title}</label>
-        <select class='form-control' name='$'>
+        <select class='form-control' name='$field_name'>
           {$list_of_options}
         </select>
         @error('$error')

@@ -97,7 +97,7 @@ class CreateFullResource extends Controller
                     . "_create_" . GraceStr::pluralLower($this->table_name) . "_table",
                 'views' => config('grace.views_folder_name') . '/' . $this->table_name,
             ]);
-            Artisan::call("cache:clear");
+            Artisan::call("route:clear");
             return redirect()->route('success');
         }
     }
