@@ -52,7 +52,7 @@ class GraceServiceProvider extends ServiceProvider
             //migrations
             __DIR__ . '/../Database/Migrations' => base_path('database/migrations'),
             //views
-            __DIR__ . '/../Views/Grace' => base_path('resources/views\grace'),
+            __DIR__ . '/../Views/Grace' => base_path('resources/views/grace'),
             //assets
             __DIR__ . '/../public/assets' => base_path('public/grace/assets'),
             //routes
