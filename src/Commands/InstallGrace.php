@@ -32,24 +32,34 @@ class InstallGrace extends Command
 
     public function register_route_file()
     {
-        $body = Core::methodSource(RouteServiceProvider::class, 'boot');
-        $routes_function = GraceStr::getBetween($body, "{", "}");
-        $routes_function_array = explode("\n", $routes_function);
-        $grace_route_registration_arrry = explode("\n", "
-            Route::middleware('web')
-                ->prefix('dashboard')
-                ->group(base_path('routes/grace.php'));");
-        foreach ($grace_route_registration_arrry as $template) {
-            array_push($routes_function_array, $template);
-        }
+        // $body = Core::methodSource(RouteServiceProvider::class, 'boot');
+        // $routes_function = GraceStr::getBetween($body, "{", "}");
+        // $routes_function_array = explode("\n", $routes_function);
+        // $grace_route_registration_arrry = explode("\n", "
+        //     Route::middleware('web')
+        //         ->prefix('dashboard')
+        //         ->group(base_path('routes/grace.php'));");
+        //         dd($grace_route_registration_arrry);
+        // foreach ($grace_route_registration_arrry as $template) {
+        //     array_push($routes_function_array, $template);
+        // }
 
-        $grace_route_registration_template = '';
-        foreach ($routes_function_array as $index => $tem) {
-            $grace_route_registration_template .= $routes_function_array[$index] . "\n";
-        }
+        // $grace_route_registration_template = '';
+        // foreach ($routes_function_array as $index => $tem) {
+        //     $grace_route_registration_template .= $routes_function_array[$index] . "\n";
+        // }
         $route_service_provider = \file_get_contents(base_path() . '/app/Providers/RouteServiceProvider.php');
-        $route_service_provider = str_replace($routes_function, $grace_route_registration_template, $route_service_provider);
-        file_put_contents(base_path() . '/app/Providers/RouteServiceProvider.php', $route_service_provider);
+        $marker_line = "\$this->routes(function () {";
+        $route_registration_str = "
+        \$this->routes(function () {
+
+         Route::middleware('web')
+            ->prefix('dashboard')
+            ->group(base_path('routes/grace.php'));
+        ";
+        $new_route_service_provider = str_replace($marker_line, $route_registration_str, $route_service_provider);
+        // $route_service_provider = str_replace($routes_function, $grace_route_registration_template, $route_service_provider);
+        file_put_contents(base_path() . '/app/Providers/RouteServiceProvider.php', $new_route_service_provider);
     }
 
     /**
